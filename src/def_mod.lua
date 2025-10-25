@@ -1,6 +1,8 @@
 ---@meta SGG_Modding-ModUtil-Mod
 
----@alias SGG_Modding-ModUtil-Mod*-nil boolean|string|number|integer|function|table|thread|userdata|lightuserdata
+---@module 'SGG_Modding-ModUtil-Common'
+
+---@alias SGG_Modding-ModUtil-Common*-nil boolean|string|number|integer|function|table|thread|userdata|lightuserdata
 
 --[[
 	DOCUMENTATION FOR MODUTIL IS A WORK IN PROGRESS!
@@ -18,175 +20,24 @@ local mod = {
     Hades = { }
 }
 
----@generic K : SGG_Modding-ModUtil-Mod*-nil
----@generic V : any
----@alias SGG_Modding-ModUtil-Mod*getter fun(iter: table<K,V>, key: K): value: V?
-
----@generic K : SGG_Modding-ModUtil-Mod*-nil
----@generic V : any
----@alias SGG_Modding-ModUtil-Mod*setter fun(iter: table<K,V>, key: K, value: V)
-
----@generic K : SGG_Modding-ModUtil-Mod*-nil
----@generic V : any
----@alias SGG_Modding-ModUtil-Mod*length fun(iter: table<K,V>): length: integer
-
----@generic K : SGG_Modding-ModUtil-Mod*-nil
----@generic V : any
----@alias SGG_Modding-ModUtil-Mod*next fun(iter: table<K,V>, key: K?): key: K?, value: V?
-
----@generic K : SGG_Modding-ModUtil-Mod*-nil
----@generic V : any
----@alias SGG_Modding-ModUtil-Mod*inext fun(iter: table<K,V>, index: integer?): index: integer?, value: V?
-
----@generic K : SGG_Modding-ModUtil-Mod*-nil
----@generic V : any
----@alias SGG_Modding-ModUtil-Mod*pairs fun(iter: table<K,V>): next: SGG_Modding-ModUtil-Mod*next<K,V>, iter: table<K,V>
-
----@generic K : SGG_Modding-ModUtil-Mod*-nil
----@generic V : any
----@alias SGG_Modding-ModUtil-Mod*ipairs fun(iter: table<K,V>): inext: SGG_Modding-ModUtil-Mod*inext<K,V>, iter: table<K,V>
-
--- base next, doesn't invoke __index
----@type SGG_Modding-ModUtil-Mod*next
-function rawnext( iter, key ) end
-
--- next that does invoke __index
----@type SGG_Modding-ModUtil-Mod*next
-function next( iter, key ) end
-
--- truly raw pairs, ignores __next and __pairs
----@type SGG_Modding-ModUtil-Mod*pairs
-function rawpairs( iter )
-	return rawnext, iter
-end
-
--- quasi-raw pairs, invokes __next but ignores __pairs
----@type SGG_Modding-ModUtil-Mod*pairs
-function qrawpairs( iter )
-    return next, iter
-end
-
--- doesn't invoke __index just like rawnext
----@type SGG_Modding-ModUtil-Mod*inext
-function rawinext( iter, index ) end
-
--- invokes __inext just like the new next
----@type SGG_Modding-ModUtil-Mod*inext
-function inext( iter, index ) end
-
--- truly raw ipairs, ignores __inext and __ipairs
----@type SGG_Modding-ModUtil-Mod*ipairs
-function rawipairs( t ) end
-
--- quasi-raw ipairs, invokes __inext but ignores __ipairs
----@type SGG_Modding-ModUtil-Mod*ipairs
-function qrawipairs( t ) end
-
--- ignore __tostring (not thread safe?)
----@param obj any
----@return string rep
-function rawtostring( obj ) end
-
----@param fn integer | function?
----@return table?
-function getfenv( fn ) end
-
---[[
-	Replace a function's _ENV with a new environment table.
-	Global variable lookups (including function calls) in that function
-	will use the new environment table rather than the normal one.
-	This is useful for function-specific overrides. The new environment
-	table should generally have _G as its __index (and usually __newindex),
-    so that any globals other than those being deliberately overridden operate as usual.
-]]
----@param fn integer | function?
----@param env table?
-function setfenv( fn, env ) end
-
--- base table.insert
----@param list table
----@param value any
-function table.rawinsert( list, value ) end
-
--- base table.insert
----@param list table
----@param pos integer
----@param value any
-function table.rawinsert( list, pos, value ) end
-
--- table.insert that respects metamethods
----@param list table
----@param value any
-function table.insert( list, value ) end
-
--- table.insert that respects metamethods
----@param list table
----@param pos integer
----@param value any
-function table.insert( list, pos, value ) end
-
--- base table.remove
----@param list table
----@param pos integer?
----@return any value
-function table.rawremove( list, pos ) end
-
--- table.remove that respects metamethods
----@param list table
----@param pos integer?
----@return any value
-function table.remove( list, pos ) end
-
--- base table.unpack
----@generic T: any
----@param list T[]
----@param start integer?
----@param stop integer?
----@return ...
-function table.rawunpack( list, start, stop ) end
-
--- table.unpack that respects metamethods
----@generic T: any
----@param list T[]
----@param start integer?
----@param stop integer?
----@return ...
-function table.unpack( list, start, stop ) end
-
--- base table.rawconcat
----@param list table
----@param sep string?
----@param start integer?
----@param stop integer?
----@return string concat
-function table.rawconcat( list, sep, start, stop ) end
-
--- table.concat that respects metamethods and includes more values
----@param list table
----@param sep string?
----@param start integer?
----@param stop integer?
----@return string concat
-function table.concat( list, sep, start, stop ) end
-
 ---@class Proxy
 mod.Metatables.Proxy = {}
----@type SGG_Modding-ModUtil-Mod*getter
+---@type SGG_Modding-ModUtil-Common*getter
 function mod.Metatables.Proxy:__index( key ) end
----@type SGG_Modding-ModUtil-Mod*setter
+---@type SGG_Modding-ModUtil-Common*setter
 function mod.Metatables.Proxy:__newindex( key, value ) end
----@type SGG_Modding-ModUtil-Mod*length
+---@type SGG_Modding-ModUtil-Common*length
 function mod.Metatables.Proxy:__len() end
----@type SGG_Modding-ModUtil-Mod*next
+---@type SGG_Modding-ModUtil-Common*next
 function mod.Metatables.Proxy:__next( key ) end
----@type SGG_Modding-ModUtil-Mod*inext
+---@type SGG_Modding-ModUtil-Common*inext
 function mod.Metatables.Proxy:__inext( index ) end
----@type SGG_Modding-ModUtil-Mod*pairs
+---@type SGG_Modding-ModUtil-Common*pairs
 function mod.Metatables.Proxy:__pairs( ) end
----@type SGG_Modding-ModUtil-Mod*ipairs
+---@type SGG_Modding-ModUtil-Common*ipairs
 function mod.Metatables.Proxy:__ipairs( ) end
 
----@generic K: SGG_Modding-ModUtil-Mod*-nil
+---@generic K: SGG_Modding-ModUtil-Common*-nil
 ---@generic V: any
 ---@param data table<K,V>
 ---@param meta table?
@@ -196,7 +47,7 @@ function mod.Proxy( data, meta ) end
 ---@class Raw: Proxy
 mod.Metatables.Raw = {}
 
----@generic K: SGG_Modding-ModUtil-Mod*-nil
+---@generic K: SGG_Modding-ModUtil-Common*-nil
 ---@generic V: any
 ---@param data table<K,V>
 ---@return Raw<K,V> proxy
@@ -204,6 +55,7 @@ function mod.Raw( data ) end
 
 -- Operations on Callables
 
+---@class SGG_Modding-ModUtil-Mod.Callable
 ---@overload fun(_: any, obj: table): boolean
 mod.Callable = { Func = { } }
 
@@ -255,51 +107,45 @@ function mod.Args.Map( map, ... ) end
 ---@return A ...
 function mod.Args.Take( n, ... ) end
 
---- TODO: ...
+---@generic A: any
+---@param n integer
+---@param ... A
+---@return A ...
+function mod.Args.Drop( n, ... ) end
+
+---@generic A: any
+---@param args A[]
+---@param ... A
+---@return A ...
+function mod.Args.Join( args, ... ) end
+
+---@generic K: SGG_Modding-ModUtil-Common*-nil
+---@generic I: any
+---@generic O: any
+---@param tbl table<K,I>
+---@param map fun(input: I): output: O
+---@return table<K,O> out
+function mod.Table.Map( tbl, map ) end
+
+---@generic K: SGG_Modding-ModUtil-Common*-nil
+---@generic I: any
+---@generic O: any
+---@param tbl table<K,I|O>
+---@param map fun(input: I): output: O
+function mod.Table.Mutate( tbl, map ) end
+
+---@generic K: SGG_Modding-ModUtil-Common*-nil
+---@generic I: any
+---@generic O: any
+---@param target table<K,I|O>
+---@param data table<K,O>
+function mod.Table.Replace( target, data ) end
+
+---@param tbl table
+---@return boolean
+function mod.Table.UnKeyed( tbl ) end
 
 --[==[
-
-function mod.Args.Drop( n, ... )
-	local args = table.pack( ... )
-	return table.rawunpack( args, n + 1, args.n )
-end
-
-function mod.Args.Join( args, ... )
-	local args = mod.Array.Join( args, table.pack( ... ) )
-	return table.rawunpack( args )
-end
-
-function mod.Table.Map( tbl, map )
-	local out = { }
-	for k, v in pairs( tbl ) do
-		out[ k ] = map( v )
-	end
-	return out
-end
-
-function mod.Table.Mutate( tbl, map )
-	for k, v in pairs( tbl ) do
-		tbl[ k ] = map( v )
-	end
-end
-
-function mod.Table.Replace( target, data )
-	for k in pairs( target ) do
-		target[ k ] = data[ k ]
-	end
-	for k, v in pairs( data ) do
-		target[ k ] = v
-	end
-end
-
-function mod.Table.UnKeyed( tbl )
-	local n = #tbl
-	for k in pairs( tbl ) do
-		if type( k ) ~= "number" or k > n or k < 1 or k ~= math.floor(k) then return false end
-	end
-	return true
-end
-
 
 function mod.String.Join( sep, ... )
 	return table.rawconcat( table.pack( ... ), sep )

@@ -5,7 +5,8 @@
 --]]
 local modutil = {}
 
----@type table?
+---@module 'SGG_Modding-ModUtil-Game'
+---@diagnostic disable-next-line: undefined-global
 modutil.globals = rom.game
 
 ---@module 'SGG_Modding-ModUtil-Mod'
