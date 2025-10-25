@@ -2,8 +2,6 @@
 
 ---@module 'SGG_Modding-ModUtil-Common'
 
----@alias SGG_Modding-ModUtil-Common*-nil boolean|string|number|integer|function|table|thread|userdata|lightuserdata
-
 --[[
 	DOCUMENTATION FOR MODUTIL IS A WORK IN PROGRESS!
 ]]
@@ -20,31 +18,24 @@ local mod = {
     Hades = { }
 }
 
----@class Proxy
+---@class SGG_Modding-ModUtil-Mod*Proxy
+---@field public __index SGG_Modding-ModUtil-Common*getter
+---@field public __newindex SGG_Modding-ModUtil-Common*setter
+---@field public __len SGG_Modding-ModUtil-Common*length
+---@field public __next SGG_Modding-ModUtil-Common*next
+---@field public __inext SGG_Modding-ModUtil-Common*inext
+---@field public __pairs SGG_Modding-ModUtil-Common*pairs
+---@field public __ipairs SGG_Modding-ModUtil-Common*ipairs
 mod.Metatables.Proxy = {}
----@type SGG_Modding-ModUtil-Common*getter
-function mod.Metatables.Proxy:__index( key ) end
----@type SGG_Modding-ModUtil-Common*setter
-function mod.Metatables.Proxy:__newindex( key, value ) end
----@type SGG_Modding-ModUtil-Common*length
-function mod.Metatables.Proxy:__len() end
----@type SGG_Modding-ModUtil-Common*next
-function mod.Metatables.Proxy:__next( key ) end
----@type SGG_Modding-ModUtil-Common*inext
-function mod.Metatables.Proxy:__inext( index ) end
----@type SGG_Modding-ModUtil-Common*pairs
-function mod.Metatables.Proxy:__pairs( ) end
----@type SGG_Modding-ModUtil-Common*ipairs
-function mod.Metatables.Proxy:__ipairs( ) end
 
 ---@generic K: SGG_Modding-ModUtil-Common*-nil
 ---@generic V: any
 ---@param data table<K,V>
 ---@param meta table?
----@return Proxy<K,V> proxy
+---@return SGG_Modding-ModUtil-Mod*Proxy<K,V> proxy
 function mod.Proxy( data, meta ) end
 
----@class Raw: Proxy
+---@class Raw: SGG_Modding-ModUtil-Mod*Proxy
 mod.Metatables.Raw = {}
 
 ---@generic K: SGG_Modding-ModUtil-Common*-nil
@@ -56,7 +47,7 @@ function mod.Raw( data ) end
 -- Operations on Callables
 
 ---@class SGG_Modding-ModUtil-Mod.Callable
----@overload fun(_: any, obj: table): boolean
+---@overload fun(obj: table): boolean
 mod.Callable = { Func = { } }
 
 ---@param obj table | function
@@ -145,200 +136,68 @@ function mod.Table.Replace( target, data ) end
 ---@return boolean
 function mod.Table.UnKeyed( tbl ) end
 
---[==[
+---@param sep string
+---@param ... string
+---@return string
+function mod.String.Join( sep, ... ) end
 
-function mod.String.Join( sep, ... )
-	return table.rawconcat( table.pack( ... ), sep )
-end
-
-function mod.String.Chunk( text, chunkSize, maxChunks )
-	local chunks = { "" }
-	local cs = 0
-	local ncs = 1
-	for chr in text:gmatch( "." ) do
-		cs = cs + 1
-		if cs > chunkSize or chr == "\n" then
-			ncs = ncs + 1
-			if maxChunks and ncs > maxChunks then
-				return chunks
-			end
-			chunks[ ncs ] = ""
-			cs = 0
-		end
-		if chr ~= "\n" then
-			chunks[ ncs ] = chunks[ ncs ] .. chr
-		end
-	end
-	return chunks
-end
+---@param text string
+---@param chunkSize integer
+---@param maxChunks integer
+---@return string[] chunks
+function mod.String.Chunk( text, chunkSize, maxChunks ) end
 
 -- String Representations
 
-local escapeCharacters = {
-	['\\'] = '\\\\', ["'"] =  "\'", ['"'] = '\"',
-	['\n'] = '\\n', ['\r'] = '\\r', ['\t'] = '\\t',
-	['\a'] = '\\a', ['\b'] = '\\b', ['\f'] = '\\f'
-}
+---@class SGG_Modding-ModUtil-Mod.ToString
+---@overload fun(obj: any): string
+mod.ToString = { }
 
-local function literalString( str )
-	for chr, esc in pairs( escapeCharacters ) do
-		str = str:gsub( chr, esc )
-	end
-	return "'" .. str .. "'"
-end
+---@param o SGG_Modding-ModUtil-Common*passByReferenceTypes
+---@return string
+---@overload fun(o: string|SGG_Modding-ModUtil-Common*passByValueTypes): nil
+function mod.ToString.Address( o ) end
 
-mod.ToString = mod.Callable.Set( { }, function( _, o )
-	---@type boolean|string
-	local identifier = o ~= nil and mod.Identifiers.Data[ o ]
-	identifier = identifier and identifier .. ": " or ""
-	return identifier .. mod.ToString.Static( o )
-end )
+---@param o any
+---@return string
+function mod.ToString.Static( o ) end
 
-function mod.ToString.Address( o )
-	local t = type( o )
-	if t == "string" or passByValueTypes[ t ] then return nil end
-	return rawtostring( o ):match( ": 0*([0-9A-F]*)" )
-end
+---@param o any
+---@return string
+function mod.ToString.Value( o ) end
 
-function mod.ToString.Static( o )
-	local t = type( o )
-	if t == "string" or passByValueTypes[ t ] then return tostring( o ) end
-	return tostring( o ):gsub( ": 0*", ": ", 1 )
-end
+---@param o any
+---@return string
+function mod.ToString.Key( o ) end
 
-function mod.ToString.Value( o )
-	local t = type( o )
-	if t == 'string' then
-		return literalString( o )
-	end
-	if passByValueTypes[ t ] then
-		return tostring( o )
-	end
-	return '<' .. mod.ToString( o ) .. '>'
-end
+---@param o table
+---@return string
+---@overload fun(o: SGG_Modding-ModUtil-Common*-table)
+function mod.ToString.TableKeys( o ) end
 
-function mod.ToString.Key( o )
-	local t = type( o )
-	if t == 'string' then
-		if not excludedFieldNames[ o ] and o:match( "^[a-zA-Z_][a-zA-Z0-9_]*$" ) then
-			return o
-		end
-		return '[' .. literalString( o ) .. ']'
-	end
-	if passByValueTypes[ t ] then
-		return "[" .. tostring( o ) .. "]"
-	end
-    return '<' .. mod.ToString( o ) .. '>'
-end
+---@param object any
+---@param limit integer?
+---@param indent string?
+---@return string
+function mod.ToString.Shallow( object, limit, indent ) end
 
-function mod.ToString.TableKeys( o )
-	if type( o ) == 'table' then
-		local out = { }
-		for k in pairs( o ) do
-			rawinsert( out , mod.ToString.Key( k ) )
-		end
-		return rawconcat( out, ',' )
-	end
-end
+---@class SGG_Modding-ModUtil-Mod.ToString.Deep
+---@overload fun(object: any, limit: integer?, depth: integer?, indent: string?): string
+mod.ToString.Deep = {}
 
-local function isNamespace( obj )
-	return obj == _ENV_ORIGINAL or obj == _ENV_REPLACED or obj == objectData or mod.Mods.Inverse[ obj ]
-		or ( getmetatable( obj ) == mod.Metatables.Raw and isNamespace( objectData[ obj ][ "data" ] ) )
-end
+---@param object any
+---@param limit integer?
+---@param depth integer?
+---@param indent string?
+function mod.ToString.Deep.NoNamespaces( object, limit, depth, indent ) end
 
-local function isNotNamespace( obj )
-	return not isNamespace( obj )
-end
+---@param object any
+---@param limit integer?
+---@param depth integer?
+---@param indent string?
+function mod.ToString.Deep.Namespaces( object, limit, depth, indent ) end
 
-local showTableAddrs = false
-
-local repk, repv = mod.ToString.Key, mod.ToString.Value
-
-local function deepLoop( o, limit, dlimit, indent, seen, cond, depth )
-	depth = depth or 0
-	if dlimit then
-		if dlimit <= depth then
-			return limit, repv( o )
-		end
-	end
-	local _indent = ''
-	if indent then
-		local __indent = { }
-		for i = 1, depth, 1 do
-			_indent[ i ] = indent
-		end
-		_indent = table.rawconcat( __indent )
-	end
-	if type( o ) ~= "table" or (seen and seen[ o ]) or (cond and not cond( o )) then
-		return limit, repv( o )
-	end
-	if seen then seen[ o ] = true end
-	local m = getmetatable( o )
-	---@type boolean|string
-	local h = showTableAddrs or ( m and m.__call ) or isNamespace( o )
-	h = ( h and repv( o ) or "" ) .. '{' .. ( indent and '\n' .. _indent .. indent or '' )
-	local out = { }
-	local i = 0
-	local broken = false
-	depth = depth + 1
-	for j, v in ipairs( o ) do
-		if cond and not cond( v ) then break end
-		i = j
-		if limit and limit <= 0 then
-			out[ i ] = "..."
-			broken = true
-			break
-		end
-		if limit then
-			limit = limit - 1
-		end
-		limit, v = deepLoop( v, limit, dlimit, indent, seen, cond, depth )
-		out[ i ] = v
-	end
-	if not broken then
-		local j = i
-		for k, v in pairs( o ) do
-			if ( not cond or cond( v ) ) and ( not isInt( k ) or k < 1 or k > j ) then
-				i = i + 1
-				if limit and limit <= 0 then
-					out[ i ] = '...'
-					break
-				end
-				if limit then
-					limit = limit - 1
-				end
-				limit, v = deepLoop( v, limit, dlimit, indent, seen, cond, depth )
-				out[ i ] = repk( k ) .. ' = ' .. v
-			end
-		end
-	end
-	local _end = ( indent and '\n' .. _indent or '' ) .. '}'
-	if i == 0 then return limit, h .. _end end
-	out[ 1 ] = h .. out[ 1 ]
-	out[ i ] = out[ i ] .. _end
-	return limit, rawconcat( out, ',' .. ( indent and '\n' .. _indent .. indent or ' ' ) )
-end
-
-function mod.ToString.Shallow( object, limit, indent )
-	local _, out = deepLoop( object, limit, 1, indent )
-	return out
-end
-
-mod.ToString.Deep = mod.Callable.Set( { }, function( _, object, limit, depth, indent )
-	local _, out = deepLoop( object, limit, depth, indent, { } )
-	return out
-end )
-
-
-function mod.ToString.Deep.NoNamespaces( object, limit, depth, indent )
-	local _, out = deepLoop( object, limit, depth, indent, { }, isNotNamespace )
-	return out
-end
-
-function mod.ToString.Deep.Namespaces( object, limit, depth, indent )
-	local _, out = deepLoop( object, limit, depth, indent, { }, isNamespace )
-	return out
-end
+--[==[
 
 -- Print
 
