@@ -1,6 +1,7 @@
 ---@meta _
 ---@diagnostic disable
 
+---@type table<any, function | table<string, table>>
 ---@module 'SGG_Modding-DemonDaemon'
 local daemon = rom.mods['SGG_Modding-DemonDaemon']
 daemon.auto()
@@ -10,6 +11,7 @@ local envy = rom.mods['SGG_Modding-ENVY']
 ---@module 'SGG_Modding-ENVY-auto'
 envy.auto(); _ENV = private
 
+---@type fun(name: "on_ready_early" | "on_ready_final" | "on_ready_late", update: "use once_loaded.game instead." | "use once_loaded.mod instead.", orig: function)
 local function deprecate(name, update, orig)
 	orig = orig or public[name]
 	public[name] = function(...)
@@ -34,7 +36,7 @@ local function define_once_loaded(name)
 	awaiting_load[name] = {}
 	trigger_loaded[name] = function()
 		has_loaded[name] = true
-		for _,callback in ipairs(awaiting_load[name]) do
+		for _, callback in ipairs(awaiting_load[name]) do
 			callback()
 		end
 		for k in pairs(awaiting_load[name]) do
@@ -43,7 +45,7 @@ local function define_once_loaded(name)
 	end
 	once_loaded[name] = function(callback)
 		if has_loaded[name] then return callback() end
-		table.insert(awaiting_load[name],callback)
+		table.insert(awaiting_load[name], callback)
 	end 
 end
 

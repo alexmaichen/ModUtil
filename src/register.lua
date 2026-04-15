@@ -1,5 +1,6 @@
 ---@meta _
----@diagnostic disable
+---@diagnostic disable undefined-global
 
-ModUtil = { }
+ModUtil = {}
+
 return ModUtil

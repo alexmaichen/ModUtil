@@ -1,5 +1,5 @@
 ---@meta _
----@diagnostic disable
+
 local config = {
 	Hades = {
 		PrintStackHeight = 10,
@@ -7,4 +7,5 @@ local config = {
 	}
 }
 ModUtil.Config = config
+
 return config
